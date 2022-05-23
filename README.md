@@ -1,3 +1,5 @@
+![2](https://user-images.githubusercontent.com/31682578/169808246-7ce1f8c4-cb6e-45e9-9b97-00a95cae6bed.png)
+
 <p align="center">
   <strong>
     NOTE: This is prerelease software. As we work towards our first release
