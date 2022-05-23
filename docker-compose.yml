@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+  # Database
+  nuxtpress.mysql:
+    container_name: ${NUXTPRESS_MYSQL_CONTAINER:-nuxtpress.mysql}
+    image: mysql:5.7
+    restart: always
+    ports:
+      - 33066:3306
+    # volumes:
+    #   - ./db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${NUXTPRESS_MYSQL_ROOT_PASSWORD:-password}
+      MYSQL_DATABASE: ${NUXTPRESS_DB_NAME:-airvity_database}
+      MYSQL_USER: ${NUXTPRESS_MYSQL_USER:-airvityadmin}
+      MYSQL_PASSWORD: ${NUXTPRESS_MYSQL_PASSWORD:-airpassword}
+    # if switch to just using .env file
+    # env_file:
+    #   - ./env/db.env
+    networks:
+      - wpsite
+
+  # phpmyadmin
+  nuxtpress.phpmyadmin:
+    container_name: ${NUXTPRESS_PHPMYADMIN_CONTAINER:-nuxtpress.phpmyadmin}
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    depends_on:
+      - ${NUXTPRESS_MYSQL_CONTAINER:-nuxtpress.mysql}
+    ports:
+      - '8080:80'
+    environment:
+      PMA_HOST: ${NUXTPRESS_MYSQL_CONTAINER:-nuxtpress.mysql}
+      MYSQL_ROOT_PASSWORD: ${NUXTPRESS_MYSQL_ROOT_PASSWORD:-password}
+    networks:
+      - wpsite
+
+  nuxtpress.wp:
+    container_name: ${NUXTPRESS_WP_CONTAINER:-nuxtpress.wp}
+    build:
+      context: ./backend/docker
+    restart: always
+    depends_on:
+      - ${NUXTPRESS_MYSQL_CONTAINER:-nuxtpress.mysql}
+    ports:
+      - '${NUXTPRESS_WP_PORT:-3080}:80'
+    environment:
+      NUXTPRESS_WP_PORT: ${NUXTPRESS_WP_PORT:-3080}
+      WORDPRESS_DB_HOST: ${NUXTPRESS_DB_HOST:-nuxtpress.mysql:3306}
+      WORDPRESS_DB_USER: ${NUXTPRESS_DB_USER:-airvityadmin}
+      WORDPRESS_DB_PASSWORD: ${NUXTPRESS_DB_PASSWORD:-airpassword}
+      WORDPRESS_DB_NAME: ${NUXTPRESS_DB_NAME:-airvity_database}
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - wpsite
+
+networks:
+  wpsite:
+
+volumes:
+  wordpress:
